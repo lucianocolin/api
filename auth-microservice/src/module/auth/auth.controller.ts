@@ -28,6 +28,6 @@ export class AuthController {
   async listUsers(
     @Payload() data: { token: string; searchUserDto: SearchUserDto },
   ) {
-    return await this.client.send('business.user.getAll', data);
+    return this.client.send('business.user.getAll', data);
   }
 }

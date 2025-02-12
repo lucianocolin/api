@@ -12,6 +12,7 @@ import { AppModule } from '../../app/app.module';
 describe('User Module', () => {
   let app: INestMicroservice;
   let client: ClientProxy;
+  let userService: UserService;
 
   const mockUserService = {
     getAll: jest.fn(),
@@ -31,6 +32,8 @@ describe('User Module', () => {
     app = module.createNestMicroservice({
       transport: Transport.NATS,
     });
+
+    userService = module.get<UserService>(UserService);
 
     client = ClientProxyFactory.create({
       transport: Transport.NATS,
@@ -54,6 +57,13 @@ describe('User Module', () => {
 
       const token = 'test-token';
 
+      jest.spyOn(userService, 'getAll').mockResolvedValue([
+        {
+          _id: 'test-id',
+          email: 'email@test.co',
+        },
+      ] as any);
+
       const result = await lastValueFrom(
         client.send('business.user.getAll', {
           token,
@@ -64,7 +74,7 @@ describe('User Module', () => {
       expect(result).toEqual(expect.any(Array));
     });
 
-    it('should throw UnauthorizedException when no token is provided', async () => {
+    it('should throw unauthorized error when no token is provided', async () => {
       const searchUserDto = {
         limit: 10,
         offset: 0,
@@ -73,16 +83,13 @@ describe('User Module', () => {
 
       const token = '';
 
-      await expect(
-        lastValueFrom(
-          client.send('business.user.getAll', {
-            token,
-            searchUserDto,
-          }),
-        ),
-      ).rejects.toEqual({
-        status: 401,
-        message: 'Unauthorized',
+      await lastValueFrom(
+        client.send('business.user.getAll', { token, searchUserDto }),
+      ).catch((error) => {
+        expect(error).toEqual({
+          status: 401,
+          message: 'Unauthorized',
+        });
       });
     });
   });

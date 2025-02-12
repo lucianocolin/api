@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './module/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [
-    AuthModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/auth-ms-db'),
-  ],
+  imports: [AuthModule, MongooseModule.forRoot(process.env.MONGO_DB_URL)],
   controllers: [],
   providers: [],
 })
