@@ -1,0 +1,15 @@
+services:
+  nats-server:
+    image: nats:latest
+    ports:
+      - 4222:4222
+
+  auth-ms-db:
+    image: mongo:5
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGODB_DATABASE: auth-ms-db
+    volumes:
+      - ./mongo:/data/db
